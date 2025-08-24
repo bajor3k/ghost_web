@@ -36,7 +36,7 @@ const mockIraHoldings: Holding[] = [
 const mockAccounts: Account[] = [
     {
         id: 'acc_1',
-        name: 'Margin Account',
+        name: 'Taxable',
         balance: 170000,
         buyingPower: 100000,
         settledCash: 45000,
