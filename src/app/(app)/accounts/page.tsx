@@ -52,7 +52,7 @@ const mockAccounts: Account[] = [
     },
     {
         id: 'acc_2',
-        name: 'IRA Account',
+        name: 'Roth',
         balance: 120000,
         buyingPower: 120000,
         settledCash: 120000,
@@ -549,3 +549,4 @@ export default function AccountsPage() {
     
 
     
+
