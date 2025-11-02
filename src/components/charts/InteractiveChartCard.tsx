@@ -334,7 +334,7 @@ export function InteractiveChartCard({ stock, onManualTickerSubmit, className, v
             </Button>
         )}
         <CardHeader className="pb-2 pt-3 px-3">
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-2 h-[80px]">
             {variant === 'trading' && stock && stock.price > 0 ? (
               <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-4">
@@ -346,11 +346,11 @@ export function InteractiveChartCard({ stock, onManualTickerSubmit, className, v
                       ${(displayPrice ?? 0).toFixed(2)}
                   </p>
                   <div className="flex items-center gap-2">
-                    <p className={cn("text-sm font-medium mt-1", displayIsUp ? 'text-[hsl(var(--confirm-green))]' : 'text-destructive')}>
+                    <p className={cn("text-sm font-medium", displayIsUp ? 'text-[hsl(var(--confirm-green))]' : 'text-destructive')}>
                           {displayIsUp ? '+' : ''}{displayChange.toFixed(2)}
                           <span className="ml-1.5">({displayIsUp ? '+' : ''}{displayPercent?.toFixed(2)}%)</span>
                       </p>
-                      <p className="text-sm font-medium mt-1 text-muted-foreground">{displayDate}</p>
+                      <p className="text-sm font-medium text-muted-foreground">{displayDate}</p>
                   </div>
                   {afterHoursVisible && stock.afterHoursPrice && stock.afterHoursChange !== undefined && (
                       <p className="text-xs text-neutral-400 mt-0.5">
