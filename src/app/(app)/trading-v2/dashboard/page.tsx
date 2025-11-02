@@ -309,7 +309,7 @@ function TradingDashboardPageContentV2() {
   }, [existingWidgets, toast]);
 
   const handleRemoveWidgetFromGroup = useCallback((groupId: string, widgetKey: WidgetKey) => {
-    setTimeout(() => {
+    useEffect(() => {
       setWidgetGroups(prev => {
           const newGroups = { ...prev };
           const group = newGroups[groupId] || [];
@@ -328,8 +328,8 @@ function TradingDashboardPageContentV2() {
           toast({ title: `Widget "${ALL_WIDGETS.find(w => w.id === widgetKey)?.label}" removed.` });
           return newGroups;
       });
-    }, 0);
-  }, [activeTabs, toast]);
+    }, [groupId, widgetKey, activeTabs, toast]);
+  }, []);
 
   useEffect(() => {
     const newActiveTabs: Record<string, WidgetKey> = {};
@@ -461,3 +461,4 @@ export default function TradingDashboardPage() {
     </Suspense>
   );
 }
+
