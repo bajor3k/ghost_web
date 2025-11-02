@@ -101,7 +101,6 @@ function TradingDashboardPageContentV2() {
   const [activeTabs, setActiveTabs] = useState<Record<string, WidgetKey>>({});
   
   const selectedAccount = useMemo(() => accounts.find(acc => acc.id === selectedAccountId), [accounts, selectedAccountId]);
-  const existingWidgets = useMemo(() => Object.values(widgetGroups).flat(), [widgetGroups]);
 
   const handleClearOrderCard = useCallback(() => {
     setOrderCardActionType(null);
@@ -166,7 +165,8 @@ function TradingDashboardPageContentV2() {
   }, [toast]);
   
   const addWidgetAsNewCard = useCallback((widgetKey: WidgetKey) => {
-    if (existingWidgets.includes(widgetKey)) {
+    const currentExistingWidgets = Object.values(widgetGroups).flat();
+    if (currentExistingWidgets.includes(widgetKey)) {
         toast({ title: `Widget "${ALL_WIDGETS.find(w => w.id === widgetKey)?.label}" is already on the dashboard.` });
         return;
     }
@@ -179,7 +179,7 @@ function TradingDashboardPageContentV2() {
         setWidgetGroups(prev => ({ ...prev, [newCardId]: [widgetKey] }));
         toast({ title: "Widget added as a new card." });
     }, 0);
-  }, [existingWidgets, toast]);
+  }, [widgetGroups, toast]);
 
     const WIDGET_COMPONENTS: Record<WidgetKey, Widget> = useMemo(() => ({
       chart: { id: 'chart', label: 'Chart', component: <InteractiveChartCardV2 stock={stockForSyncedComps} onManualTickerSubmit={handleSyncedTickerChange} /> },
@@ -289,7 +289,8 @@ function TradingDashboardPageContentV2() {
   }, [syncedTickerSymbol, toast]);
   
   const addWidgetToGroup = useCallback((groupId: string, widgetKey: WidgetKey) => {
-    if (existingWidgets.includes(widgetKey)) {
+    const currentExistingWidgets = Object.values(widgetGroups).flat();
+    if (currentExistingWidgets.includes(widgetKey)) {
         toast({ title: `Widget "${ALL_WIDGETS.find(w => w.id === widgetKey)?.label}" is already on the dashboard.` });
         return;
     }
@@ -307,7 +308,7 @@ function TradingDashboardPageContentV2() {
             return newGroups;
         });
     }, 0);
-  }, [existingWidgets, toast]);
+  }, [widgetGroups, toast]);
 
   const handleRemoveWidgetFromGroup = useCallback((groupId: string, widgetKey: WidgetKey) => {
     setTimeout(() => {
@@ -346,7 +347,7 @@ function TradingDashboardPageContentV2() {
             }
         }
     }
-    if (hasChanged || Object.keys(newActiveTabs).length !== Object.keys(activeTabs).length) {
+    if (Object.keys(newActiveTabs).length !== Object.keys(activeTabs).length || hasChanged) {
         setActiveTabs(newActiveTabs);
     }
   }, [widgetGroups, activeTabs]);
@@ -389,10 +390,11 @@ function TradingDashboardPageContentV2() {
                                 <DraggableCard>
                                     {isChart ? (
                                         WIDGET_COMPONENTS['chart'].component
-                                    ) : widgetsInGroup.length === 1 ? (
-                                        <>
-                                            {WIDGET_COMPONENTS[widgetsInGroup[0]] ? WIDGET_COMPONENTS[widgetsInGroup[0]].component : null}
-                                        </>
+                                    ) : widgetsInGroup.length === 1 && WIDGET_COMPONENTS[widgetsInGroup[0]] ? (
+                                        React.cloneElement(WIDGET_COMPONENTS[widgetsInGroup[0]].component as React.ReactElement<any>, {
+                                            onDelete: () => handleDeleteWidget(groupId),
+                                            onAddWidget: addWidgetAsNewCard,
+                                        })
                                     ) : (
                                        <Tabs value={activeTab} onValueChange={(tab) => setActiveTabs(tabs => ({...tabs, [groupId]: tab as WidgetKey}))} className="flex flex-col h-full">
                                             <CardHeader className="p-0 border-b border-white/10 h-8 flex-row items-center drag-handle cursor-move">
@@ -426,9 +428,9 @@ function TradingDashboardPageContentV2() {
                                                                     variant="ghost" 
                                                                     className="w-full justify-start text-xs h-8"
                                                                     onClick={() => addWidgetToGroup(groupId, w.id)}
-                                                                    disabled={existingWidgets.includes(w.id)}
+                                                                    disabled={Object.values(widgetGroups).flat().includes(w.id)}
                                                                 >
-                                                                    {w.label} {existingWidgets.includes(w.id) && "(Added)"}
+                                                                    {w.label} {Object.values(widgetGroups).flat().includes(w.id) && "(Added)"}
                                                                 </Button>
                                                             ))}
                                                         </div>
