@@ -9,7 +9,7 @@ import { PackageSearch, XCircle, Trash2, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../../ui/button';
 import { Badge } from '../../ui/badge';
-import type { OrderActionType, OrderSystemType, WidgetKey } from '@/types';
+import type { OrderActionType, OrderSystemType, WidgetKey, OrdersTableV2Props } from '@/types';
 import { CardMenu } from '../CardMenu';
 import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
 import { useToast } from '@/hooks/use-toast';
@@ -44,11 +44,6 @@ const dummyOpenOrders: OpenOrder[] = [
     { id: 'ord_3', action: 'Short', symbol: 'TSLA', side: 'Sell', quantity: 10, orderType: 'Market', status: 'Pending', time: '10:15:50 AM' },
 ];
 
-
-interface OrdersTableProps {
-  className?: string;
-}
-
 const getSideBadgeClass = (side: OpenOrder['side']) => {
     switch(side) {
         case 'Buy': return 'bg-[hsl(var(--confirm-green))] text-[hsl(var(--confirm-green-foreground))] hover:bg-[hsl(var(--confirm-green))]/90';
@@ -57,7 +52,7 @@ const getSideBadgeClass = (side: OpenOrder['side']) => {
     }
 }
 
-export function OrdersTableV2({ className }: OrdersTableProps) {
+export function OrdersTableV2({ className, onDelete, onAddWidget }: OrdersTableV2Props) {
   const [openOrders, setOpenOrders] = React.useState(dummyOpenOrders);
   const { toast } = useToast();
 
@@ -67,14 +62,6 @@ export function OrdersTableV2({ className }: OrdersTableProps) {
 
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
       e.stopPropagation();
-  }
-
-  const handleDelete = () => {
-    toast({ title: 'This card cannot be deleted.' });
-  };
-  
-  const handleAddWidget = (widgetKey: WidgetKey) => {
-    toast({ title: `Add widget: ${widgetKey}` });
   }
 
   return (
@@ -97,7 +84,7 @@ export function OrdersTableV2({ className }: OrdersTableProps) {
                                   key={w.key}
                                   variant="ghost" 
                                   className="w-full justify-start text-xs h-8"
-                                  onClick={() => handleAddWidget(w.key)}
+                                  onClick={() => onAddWidget(w.key)}
                               >
                                   {w.label}
                               </Button>
@@ -105,7 +92,7 @@ export function OrdersTableV2({ className }: OrdersTableProps) {
                       </div>
                   </PopoverContent>
                </Popover>
-              <CardMenu onCustomize={() => toast({title: "Customize Open Orders..."})} onDelete={handleDelete} />
+              <CardMenu onCustomize={() => toast({title: "Customize Open Orders..."})} onDelete={onDelete} />
           </div>
       </CardHeader>
       <div className="p-0 flex-1 overflow-y-auto">

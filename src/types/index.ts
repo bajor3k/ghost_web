@@ -305,4 +305,9 @@ export interface OrderCardV2Props {
     onAddWidget: (widgetKey: WidgetKey) => void;
 }
 
+export interface OrdersTableV2Props {
+  className?: string;
+  onDelete: () => void;
+  onAddWidget: (widgetKey: WidgetKey) => void;
+}
     
