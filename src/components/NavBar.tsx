@@ -30,6 +30,7 @@ const AppNavLinks = () => {
   const pathname = usePathname();
 
   const links = [
+    { href: "/banking", label: "Banking" },
     { href: "/accounts", label: "Dashboard" },
     { href: "/trading/dashboard", label: "Trade" },
     { href: "/news", label: "News" },
