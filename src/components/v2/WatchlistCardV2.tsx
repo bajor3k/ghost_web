@@ -9,14 +9,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { initialMockStocks } from "@/app/(app)/trading/dashboard/mock-data";
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Button } from '../ui/button';
+import { Plus } from 'lucide-react';
+import { CardMenu } from './CardMenu';
+import { useToast } from '@/hooks/use-toast';
+import type { WidgetKey } from '@/types';
+
+
+const WIDGETS = [
+  { key: "chart" as WidgetKey, label: "Chart" },
+  { key: "order" as WidgetKey, label: "Trading Card" },
+  { key: "positions" as WidgetKey, label: "Positions" },
+  { key: "orders" as WidgetKey, label: "Open Orders" },
+  { key: "history" as WidgetKey, label: "History" },
+  { key: "watchlist" as WidgetKey, label: "Watchlist" },
+  { key: "screeners" as WidgetKey, label: "Screeners" },
+  { key: "news" as WidgetKey, label: "News" },
+  { key: "details" as WidgetKey, label: "Details" },
+];
 
 interface WatchlistCardProps {
     className?: string;
     onSymbolSelect: (symbol: string) => void;
     selectedSymbol: string | null;
+    onDelete?: () => void;
+    onAddWidget?: (widgetKey: WidgetKey) => void;
 }
 
 const watchlistStocks = initialMockStocks.slice(0, 15);
@@ -32,9 +54,48 @@ const formatShortFloat = (shortFloat?: number) => {
     return `${shortFloat.toFixed(2)}%`;
 }
 
-export const WatchlistCardV2: React.FC<WatchlistCardProps> = ({ className, onSymbolSelect, selectedSymbol }) => {
+export const WatchlistCardV2: React.FC<WatchlistCardProps> = ({ className, onSymbolSelect, selectedSymbol, onDelete, onAddWidget }) => {
+    const { toast } = useToast();
+
+    const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+      e.stopPropagation();
+    }
+    
+    const showHeader = onDelete && onAddWidget;
+    
     return (
         <div className={cn("h-full flex flex-col", className)}>
+             {showHeader && (
+                <CardHeader className="py-1 px-3 border-b border-white/10 h-8 flex-row items-center drag-handle cursor-move">
+                    <CardTitle className="text-sm font-semibold text-muted-foreground">
+                        Watchlist
+                    </CardTitle>
+                    <div className="ml-auto flex items-center gap-1 no-drag">
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="ghost" className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground" onMouseDown={handleInteraction} onTouchStart={handleInteraction}>
+                                    <Plus size={16} />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-48 p-1" onMouseDown={handleInteraction} onTouchStart={handleInteraction}>
+                                <div className="flex flex-col">
+                                    {WIDGETS.map(w => (
+                                        <Button 
+                                            key={w.key}
+                                            variant="ghost" 
+                                            className="w-full justify-start text-xs h-8"
+                                            onClick={() => onAddWidget(w.key)}
+                                        >
+                                            {w.label}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </PopoverContent>
+                        </Popover>
+                        <CardMenu onCustomize={() => toast({title: "Customize Watchlist..."})} onDelete={onDelete} />
+                    </div>
+                </CardHeader>
+            )}
             <div className="flex-1 overflow-y-auto px-3 pb-3 pt-2">
                 <Table>
                     <TableHeader className="sticky top-0 bg-card z-[1]">
