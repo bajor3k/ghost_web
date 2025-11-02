@@ -85,9 +85,11 @@ export function OpenPositionsCardV2({ className, onDelete, onAddWidget }: OpenPo
       e.stopPropagation();
     }
 
+    const showHeader = onDelete && onAddWidget;
+
     return (
         <div className={cn("h-full flex flex-col", className)}>
-            {onDelete && onAddWidget && (
+            {showHeader && (
                  <CardHeader className="py-1 px-3 border-b border-white/10 h-8 flex-row items-center drag-handle cursor-move">
                   <CardTitle className="text-sm font-semibold text-muted-foreground">
                       Positions
