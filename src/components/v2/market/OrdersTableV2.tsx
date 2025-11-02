@@ -5,11 +5,26 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PackageSearch, XCircle, Trash2 } from 'lucide-react';
+import { PackageSearch, XCircle, Trash2, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../../ui/button';
 import { Badge } from '../../ui/badge';
-import type { OrderActionType, OrderSystemType } from '@/types';
+import type { OrderActionType, OrderSystemType, WidgetKey } from '@/types';
+import { CardMenu } from '../CardMenu';
+import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
+import { useToast } from '@/hooks/use-toast';
+
+const WIDGETS = [
+  { key: "chart" as WidgetKey, label: "Chart" },
+  { key: "order" as WidgetKey, label: "Trading Card" },
+  { key: "positions" as WidgetKey, label: "Positions" },
+  { key: "orders" as WidgetKey, label: "Open Orders" },
+  { key: "history" as WidgetKey, label: "History" },
+  { key: "watchlist" as WidgetKey, label: "Watchlist" },
+  { key: "screeners" as WidgetKey, label: "Screeners" },
+  { key: "news" as WidgetKey, label: "News" },
+  { key: "details" as WidgetKey, label: "Details" },
+];
 
 interface OpenOrder {
     id: string;
@@ -44,13 +59,55 @@ const getSideBadgeClass = (side: OpenOrder['side']) => {
 
 export function OrdersTableV2({ className }: OrdersTableProps) {
   const [openOrders, setOpenOrders] = React.useState(dummyOpenOrders);
+  const { toast } = useToast();
 
   const cancelOrder = (id: string) => {
       setOpenOrders(prev => prev.filter(order => order.id !== id));
   }
 
+  const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+      e.stopPropagation();
+  }
+
+  const handleDelete = () => {
+    toast({ title: 'This card cannot be deleted.' });
+  };
+  
+  const handleAddWidget = (widgetKey: WidgetKey) => {
+    toast({ title: `Add widget: ${widgetKey}` });
+  }
+
   return (
     <div className={cn("h-full flex flex-col", className)}>
+       <CardHeader className="py-1 px-3 border-b border-white/10 h-8 flex-row items-center drag-handle cursor-move">
+          <CardTitle className="text-sm font-semibold text-muted-foreground">
+              Open Orders
+          </CardTitle>
+          <div className="ml-auto flex items-center gap-1 no-drag">
+               <Popover>
+                  <PopoverTrigger asChild>
+                      <Button variant="ghost" className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground" onMouseDown={handleInteraction} onTouchStart={handleInteraction}>
+                          <Plus size={16} />
+                      </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-1" onMouseDown={handleInteraction} onTouchStart={handleInteraction}>
+                      <div className="flex flex-col">
+                          {WIDGETS.map(w => (
+                              <Button 
+                                  key={w.key}
+                                  variant="ghost" 
+                                  className="w-full justify-start text-xs h-8"
+                                  onClick={() => handleAddWidget(w.key)}
+                              >
+                                  {w.label}
+                              </Button>
+                          ))}
+                      </div>
+                  </PopoverContent>
+               </Popover>
+              <CardMenu onCustomize={() => toast({title: "Customize Open Orders..."})} onDelete={handleDelete} />
+          </div>
+      </CardHeader>
       <div className="p-0 flex-1 overflow-y-auto">
         <Table>
           <TableHeader className="sticky top-0 bg-card z-[1]">
