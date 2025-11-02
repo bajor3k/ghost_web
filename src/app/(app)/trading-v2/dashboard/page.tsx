@@ -61,10 +61,10 @@ const initialLayouts: ReactGridLayout.Layout[] = [
     { i: 'chart', x: 0, y: 0, w: 9, h: 10, minW: 2, minH: 8, isResizable: true },
     { i: 'order', x: 9, y: 0, w: 3, h: 10, minW: 2, minH: 10, isResizable: true },
     { i: 'details', x: 9, y: 10, w: 3, h: 5, minW: 3, isResizable: true },
-    { i: 'positions', x: 0, y: 10, w: 5, h: 8, minW: 2, minH: 6, isResizable: true },
-    { i: 'orders', x: 5, y: 10, w: 4, h: 8, minW: 2, minH: 6, isResizable: true },
+    { i: 'positions', x: 0, y: 10, w: 9, h: 8, minW: 2, minH: 6, isResizable: true },
     { i: 'watchlist', x: 0, y: 18, w: 6, h: 8, minW: 2, minH: 6, isResizable: true },
     { i: 'news', x: 6, y: 18, w: 6, h: 8, minW: 2, minH: 6, isResizable: true },
+    { i: 'orders', x: 0, y: 26, w: 12, h: 8, minW: 2, minH: 6, isResizable: true},
 ];
 
 const initialWidgetGroups: Record<string, WidgetKey[]> = {
@@ -72,9 +72,9 @@ const initialWidgetGroups: Record<string, WidgetKey[]> = {
     'order': ['order'],
     'details': ['details'],
     'positions': ['positions', 'history'],
-    'orders': ['orders'],
     'watchlist': ['watchlist', 'screeners'],
     'news': ['news'],
+    'orders': ['orders'],
 };
 
 
@@ -185,9 +185,9 @@ function TradingDashboardPageContentV2() {
       chart: { id: 'chart', label: 'Chart', component: <InteractiveChartCardV2 stock={stockForSyncedComps} onManualTickerSubmit={handleSyncedTickerChange} /> },
       order: { id: 'order', label: 'Trade', component: <OrderCardV2 selectedStock={stockForSyncedComps} initialActionType={orderCardActionType} initialTradeMode={orderCardInitialTradeMode} miloActionContextText={orderCardMiloActionContext} onSubmit={handleTradeSubmit} onClear={handleClearOrderCard} initialQuantity={orderCardInitialQuantity} initialOrderType={orderCardInitialOrderType} initialLimitPrice={orderCardInitialLimitPrice} className="h-full" onDelete={() => handleDeleteWidget('order')} onAddWidget={addWidgetAsNewCard} /> },
       details: { id: 'details', label: 'Details', component: <DetailsCardV2 account={selectedAccount} onDelete={() => handleDeleteWidget('details')} onAddWidget={addWidgetAsNewCard} />},
-      positions: { id: 'positions', label: 'Positions', component: <OpenPositionsCardV2 className="h-full border-0 shadow-none rounded-none bg-transparent" /> },
+      positions: { id: 'positions', label: 'Positions', component: <OpenPositionsCardV2 className="h-full border-0 shadow-none rounded-none bg-transparent" onDelete={() => handleDeleteWidget('positions')} onAddWidget={addWidgetAsNewCard} /> },
       orders: { id: 'orders', label: 'Open Orders', component: <OrdersTableV2 className="h-full border-0 shadow-none rounded-none bg-transparent" onDelete={() => handleDeleteWidget('orders')} onAddWidget={addWidgetAsNewCard} /> },
-      history: { id: 'history', label: 'History', component: <TradeHistoryTableV2 className="h-full border-0 shadow-none rounded-none bg-transparent" syncedTickerSymbol={syncedTickerSymbol} /> },
+      history: { id: 'history', label: 'History', component: <TradeHistoryTableV2 className="h-full border-0 shadow-none rounded-none bg-transparent" syncedTickerSymbol={syncedTickerSymbol} onDelete={() => handleDeleteWidget('history')} onAddWidget={addWidgetAsNewCard} /> },
       watchlist: { id: 'watchlist', label: 'Watchlist', component: <WatchlistCardV2 className="h-full border-0 shadow-none rounded-none bg-transparent" onSymbolSelect={handleSyncedTickerChange} selectedSymbol={syncedTickerSymbol} /> },
       screeners: { id: 'screeners', label: 'Screeners', component: <ScreenerWatchlistV2 className="h-full border-0 shadow-none rounded-none bg-transparent" onSymbolSelect={handleSyncedTickerChange} selectedSymbol={syncedTickerSymbol} /> },
       news: { id: 'news', label: 'News', component: <NewsCardV2 className="h-full border-0 shadow-none rounded-none bg-transparent" onSymbolSelect={handleSyncedTickerChange} selectedSymbol={syncedTickerSymbol} onDelete={() => handleDeleteWidget('news')} onAddWidget={addWidgetAsNewCard} /> },
@@ -309,27 +309,24 @@ function TradingDashboardPageContentV2() {
   }, [existingWidgets, toast]);
 
   const handleRemoveWidgetFromGroup = useCallback((groupId: string, widgetKey: WidgetKey) => {
-    useEffect(() => {
-      setWidgetGroups(prev => {
-          const newGroups = { ...prev };
-          const group = newGroups[groupId] || [];
-          const newGroup = group.filter(wk => wk !== widgetKey);
-          
-          if (newGroup.length === 0) {
-              setLayouts(layouts => layouts.filter(l => l.i !== groupId));
-              delete newGroups[groupId];
-          } else {
-              newGroups[groupId] = newGroup;
-              if (activeTabs[groupId] === widgetKey) {
-                  setActiveTabs(tabs => ({ ...tabs, [groupId]: newGroup[0] }));
-              }
-          }
-
-          toast({ title: `Widget "${ALL_WIDGETS.find(w => w.id === widgetKey)?.label}" removed.` });
-          return newGroups;
-      });
-    }, [groupId, widgetKey, activeTabs, toast]);
-  }, []);
+    setWidgetGroups(prev => {
+        const newGroups = { ...prev };
+        const group = newGroups[groupId] || [];
+        const newGroup = group.filter(wk => wk !== widgetKey);
+        
+        if (newGroup.length === 0) {
+            setLayouts(layouts => layouts.filter(l => l.i !== groupId));
+            delete newGroups[groupId];
+            toast({ title: `Widget "${ALL_WIDGETS.find(w => w.id === widgetKey)?.label}" removed.` });
+        } else {
+            newGroups[groupId] = newGroup;
+            if (activeTabs[groupId] === widgetKey) {
+                setActiveTabs(tabs => ({ ...tabs, [groupId]: newGroup[0] }));
+            }
+        }
+        return newGroups;
+    });
+  }, [activeTabs, toast]);
 
   useEffect(() => {
     const newActiveTabs: Record<string, WidgetKey> = {};
@@ -345,7 +342,7 @@ function TradingDashboardPageContentV2() {
         }
     }
     setActiveTabs(newActiveTabs);
-  }, [widgetGroups]);
+  }, [widgetGroups, activeTabs]);
   
   return (
     <main className="w-full h-full flex flex-col bg-background relative bg-dot-grid">
@@ -461,4 +458,3 @@ export default function TradingDashboardPage() {
     </Suspense>
   );
 }
-

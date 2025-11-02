@@ -7,12 +7,30 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { PackageSearch } from 'lucide-react';
-import type { OpenPosition } from '@/types';
+import { PackageSearch, Plus } from 'lucide-react';
+import type { OpenPosition, WidgetKey } from '@/types';
 import { Badge } from '@/components/ui/badge';
+import { CardHeader, CardTitle } from '../ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { CardMenu } from './CardMenu';
+import { useToast } from '@/hooks/use-toast';
+
+const WIDGETS = [
+  { key: "chart" as WidgetKey, label: "Chart" },
+  { key: "order" as WidgetKey, label: "Trading Card" },
+  { key: "positions" as WidgetKey, label: "Positions" },
+  { key: "orders" as WidgetKey, label: "Open Orders" },
+  { key: "history" as WidgetKey, label: "History" },
+  { key: "watchlist" as WidgetKey, label: "Watchlist" },
+  { key: "screeners" as WidgetKey, label: "Screeners" },
+  { key: "news" as WidgetKey, label: "News" },
+  { key: "details" as WidgetKey, label: "Details" },
+];
 
 interface OpenPositionsCardProps {
     className?: string;
+    onDelete?: () => void;
+    onAddWidget?: (widgetKey: WidgetKey) => void;
 }
 
 const PositionRow = ({ position, onClose }: { position: OpenPosition; onClose: (id: string) => void; }) => {
@@ -59,11 +77,47 @@ const PositionRow = ({ position, onClose }: { position: OpenPosition; onClose: (
     );
 };
 
-export function OpenPositionsCardV2({ className }: OpenPositionsCardProps) {
+export function OpenPositionsCardV2({ className, onDelete, onAddWidget }: OpenPositionsCardProps) {
     const { openPositions, closePosition } = useOpenPositionsContext();
+    const { toast } = useToast();
+
+    const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+      e.stopPropagation();
+    }
 
     return (
         <div className={cn("h-full flex flex-col", className)}>
+            {onDelete && onAddWidget && (
+                 <CardHeader className="py-1 px-3 border-b border-white/10 h-8 flex-row items-center drag-handle cursor-move">
+                  <CardTitle className="text-sm font-semibold text-muted-foreground">
+                      Positions
+                  </CardTitle>
+                  <div className="ml-auto flex items-center gap-1 no-drag">
+                       <Popover>
+                          <PopoverTrigger asChild>
+                              <Button variant="ghost" className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground" onMouseDown={handleInteraction} onTouchStart={handleInteraction}>
+                                  <Plus size={16} />
+                              </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-48 p-1" onMouseDown={handleInteraction} onTouchStart={handleInteraction}>
+                              <div className="flex flex-col">
+                                  {WIDGETS.map(w => (
+                                      <Button 
+                                          key={w.key}
+                                          variant="ghost" 
+                                          className="w-full justify-start text-xs h-8"
+                                          onClick={() => onAddWidget(w.key)}
+                                      >
+                                          {w.label}
+                                      </Button>
+                                  ))}
+                              </div>
+                          </PopoverContent>
+                       </Popover>
+                      <CardMenu onCustomize={() => toast({title: "Customize Positions..."})} onDelete={onDelete} />
+                  </div>
+              </CardHeader>
+            )}
             <div className="p-0 flex-1 overflow-y-auto">
                 <Table>
                     <TableHeader className="sticky top-0 bg-card z-[1]">
