@@ -21,9 +21,77 @@ const accounts: Account[] = [
 
 const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
 
+type Transaction = {
+  id: string;
+  date: string;
+  description: string;
+  type: "Deposit" | "ACH" | "Purchase" | "Withdrawal";
+  amount: number;
+}
+
+const transactions: Transaction[] = [
+    { id: "txn_1", date: "2025-07-28", description: "Ghost Trading", type: "ACH", amount: -75.00 },
+    { id: "txn_2", date: "2025-07-27", description: "Direct Deposit", type: "Deposit", amount: 1200.00 },
+    { id: "txn_3", date: "2025-07-26", description: "Spooky Treats Co.", type: "Purchase", amount: -12.50 },
+    { id: "txn_4", date: "2025-07-25", description: "ATM Withdrawal", type: "Withdrawal", amount: -40.00 },
+    { id: "txn_5", date: "2025-07-25", description: "Ectoplasm Coffee", type: "Purchase", amount: -6.75 },
+]
+
 function formatUSD(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
 }
+
+function formatDate(dateString: string) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+const RecentTransactions = () => (
+    <section
+      className={cn(
+        "mt-6 md:mt-8",
+        "rounded-2xl border border-white/10 bg-white/5 backdrop-blur",
+        "shadow-[0_0_0_1px_rgba(180,112,255,0.06)_inset] relative"
+      )}
+    >
+      <header className="px-5 py-4 border-b border-white/10">
+        <h2 className="text-sm font-medium tracking-wide text-white/80">Recent Transactions</h2>
+      </header>
+      <ul className="divide-y divide-white/10">
+          {transactions.map((t) => {
+              const isDebit = t.amount < 0;
+              return (
+                  <li key={t.id}>
+                    <div
+                      className={cn(
+                        "group flex items-center gap-3 md:gap-4",
+                        "px-5 py-4"
+                      )}
+                    >
+                      {/* Left: Date + Description */}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-base md:text-lg font-semibold text-white">{t.description}</div>
+                        <div className="text-xs md:text-sm text-white/60">
+                           {formatDate(t.date)}
+                        </div>
+                      </div>
+                      
+                      {/* Right: Amount */}
+                       <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <div className={cn("text-base md:text-lg font-semibold tabular-nums", isDebit ? "text-white" : "text-[hsl(var(--confirm-green))]")}>
+                            {isDebit ? formatUSD(t.amount) : `+${formatUSD(t.amount)}`}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+              );
+          })}
+      </ul>
+    </section>
+);
+
 
 export default function BankingPage() {
   return (
@@ -99,6 +167,8 @@ export default function BankingPage() {
           ))}
         </ul>
       </section>
+      
+      <RecentTransactions />
     </main>
   );
 }
