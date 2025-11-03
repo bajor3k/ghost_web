@@ -38,57 +38,50 @@ const transactions: Transaction[] = [
 ]
 
 function formatUSD(n: number) {
-  return n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
+  const isNegative = n < 0;
+  const absoluteValue = Math.abs(n);
+  const formatted = absoluteValue.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
+  return isNegative ? `-${formatted}` : formatted;
 }
 
+
 function formatDate(dateString: string) {
-    const date = new Date(dateString);
+    const date = new Date(dateString + 'T00:00:00'); // Assume UTC if no timezone
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 const RecentTransactions = () => (
-    <section
-      className={cn(
-        "mt-6 md:mt-8",
-        "rounded-2xl border border-white/10 bg-white/5 backdrop-blur",
-        "shadow-[0_0_0_1px_rgba(180,112,255,0.06)_inset] relative"
-      )}
-    >
-      <header className="px-5 py-4 border-b border-white/10">
-        <h2 className="text-sm font-medium tracking-wide text-white/80">Recent Transactions</h2>
+    <section className="mt-8 md:mt-12 rounded-2xl bg-card">
+      <header className="px-5 py-4">
+        <h2 className="text-xl font-semibold text-white">Recent Transactions</h2>
       </header>
-      <ul className="divide-y divide-white/10">
-          {transactions.map((t) => {
-              const isDebit = t.amount < 0;
-              return (
-                  <li key={t.id}>
-                    <div
-                      className={cn(
-                        "group flex items-center gap-3 md:gap-4",
-                        "px-5 py-4"
-                      )}
-                    >
-                      {/* Left: Date + Description */}
-                      <div className="flex-1 min-w-0">
-                        <div className="text-base md:text-lg font-semibold text-white">{t.description}</div>
-                        <div className="text-xs md:text-sm text-white/60">
-                           {formatDate(t.date)}
-                        </div>
-                      </div>
-                      
-                      {/* Right: Amount */}
-                       <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <div className={cn("text-base md:text-lg font-semibold tabular-nums", isDebit ? "text-white" : "text-[hsl(var(--confirm-green))]")}>
-                            {isDebit ? formatUSD(t.amount) : `+${formatUSD(t.amount)}`}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-              );
-          })}
-      </ul>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+            <thead>
+                <tr className="border-b border-white/10">
+                    <th className="py-3 px-5 text-left font-bold text-sm whitespace-nowrap text-muted-foreground">Date</th>
+                    <th className="py-3 px-5 text-left font-bold text-sm whitespace-nowrap text-muted-foreground">Description</th>
+                    <th className="py-3 px-5 text-left font-bold text-sm whitespace-nowrap text-muted-foreground">Type</th>
+                    <th className="py-3 px-5 text-right font-bold text-sm whitespace-nowrap text-muted-foreground">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+              {transactions.map((t) => {
+                  const isDebit = t.amount < 0;
+                  return (
+                      <tr key={t.id} className="transition-colors border-none hover:bg-white/5">
+                        <td className="px-5 py-3 text-sm text-white/80">{formatDate(t.date)}</td>
+                        <td className="px-5 py-3 text-sm font-semibold text-white">{t.description}</td>
+                        <td className="px-5 py-3 text-sm text-white/80">{t.type}</td>
+                        <td className={cn("px-5 py-3 text-right font-semibold tabular-nums", isDebit ? "text-white" : "text-[hsl(var(--confirm-green))]")}>
+                            {formatUSD(t.amount)}
+                        </td>
+                      </tr>
+                  );
+              })}
+            </tbody>
+        </table>
+      </div>
     </section>
 );
 
