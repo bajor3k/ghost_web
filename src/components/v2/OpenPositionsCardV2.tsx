@@ -84,7 +84,7 @@ export function OpenPositionsCardV2({ className, onDelete, onAddWidget }: OpenPo
     const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
       e.stopPropagation();
     }
-
+    
     const showHeader = onDelete && onAddWidget;
 
     return (
