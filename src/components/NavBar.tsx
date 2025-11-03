@@ -31,7 +31,7 @@ const AppNavLinks = () => {
 
   const links = [
     { href: "/banking", label: "Banking" },
-    { href: "/accounts", label: "Dashboard" },
+    { href: "/accounts", label: "Investments" },
     { href: "/trading/dashboard", label: "Trade" },
     { href: "/news", label: "News" },
     { href: "/screener", label: "Screener" },
