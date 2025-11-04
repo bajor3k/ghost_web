@@ -232,8 +232,13 @@ export const OrderCard: React.FC<OrderCardProps> = ({
     return (
         <Card className={cn("flex flex-col bg-black/50 border-white/10", className)}>
             <CardContent className="flex flex-col p-3 space-y-3 overflow-visible">
-                <div className="text-sm font-medium text-white pb-1">
-                    {action} {selectedStock?.symbol}
+                <div className="flex justify-between items-center pb-1">
+                    <div className="text-sm font-medium text-white">
+                        {action} {selectedStock?.symbol}
+                    </div>
+                    {selectedStock?.tradingFeatures && (
+                        <TradingFeaturesBadges features={selectedStock.tradingFeatures} />
+                    )}
                 </div>
                 <Separator className="bg-white/20" />
 
@@ -346,11 +351,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
 
                 <div className="flex-1"></div>
 
-                {selectedStock?.tradingFeatures && (
-                    <div className="flex items-center justify-center my-2">
-                        <TradingFeaturesBadges features={selectedStock.tradingFeatures} />
-                    </div>
-                )}
                 
                 <div className="space-y-0 p-3 mt-auto rounded-lg bg-black/40 border border-white/10">
                      <DetailItem
