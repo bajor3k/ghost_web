@@ -32,9 +32,10 @@ interface TradeHistoryTableProps {
   syncedTickerSymbol: string | null;
   onDelete?: () => void;
   onAddWidget?: (widgetKey: WidgetKey) => void;
+  isGrouped?: boolean;
 }
 
-export function TradeHistoryTableV2({ className, syncedTickerSymbol, onDelete, onAddWidget }: TradeHistoryTableProps) {
+export function TradeHistoryTableV2({ className, syncedTickerSymbol, onDelete, onAddWidget, isGrouped }: TradeHistoryTableProps) {
   const { tradeHistory } = useTradeHistoryContext();
   const { toast } = useToast();
   
@@ -50,7 +51,7 @@ export function TradeHistoryTableV2({ className, syncedTickerSymbol, onDelete, o
       e.stopPropagation();
   }
 
-  const showHeader = onDelete && onAddWidget;
+  const showHeader = onDelete && onAddWidget && !isGrouped;
 
   return (
     <div className={cn("h-full flex flex-col", className)}>

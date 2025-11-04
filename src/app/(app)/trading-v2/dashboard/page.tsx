@@ -164,22 +164,25 @@ function TradingDashboardPageContentV2() {
     toast({ title: `Card removed from layout.` });
   }, [toast]);
   
-  const addWidgetAsNewCard = useCallback((widgetKey: WidgetKey) => {
-    const currentExistingWidgets = Object.values(widgetGroups).flat();
-    if (currentExistingWidgets.includes(widgetKey)) {
-        toast({ title: `Widget "${ALL_WIDGETS.find(w => w.id === widgetKey)?.label}" is already on the dashboard.` });
-        return;
-    }
-    const newCardId = uuidv4();
-    const newLayoutItem: ReactGridLayout.Layout = { i: newCardId, x: 0, y: Infinity, w: 4, h: 8, minW: 2, minH: 6 };
-    
-    // Use timeout to ensure this runs after the current render cycle
-    setTimeout(() => {
+    const addWidgetAsNewCard = useCallback((widgetKey: WidgetKey) => {
+        let currentExistingWidgets: WidgetKey[] = [];
+        setWidgetGroups(currentGroups => {
+            currentExistingWidgets = Object.values(currentGroups).flat();
+            return currentGroups;
+        });
+
+        if (currentExistingWidgets.includes(widgetKey)) {
+            toast({ title: `Widget "${ALL_WIDGETS.find(w => w.id === widgetKey)?.label}" is already on the dashboard.` });
+            return;
+        }
+
+        const newCardId = uuidv4();
+        const newLayoutItem: ReactGridLayout.Layout = { i: newCardId, x: 0, y: Infinity, w: 4, h: 8, minW: 2, minH: 6 };
+
         setLayouts(prev => [...prev, newLayoutItem]);
         setWidgetGroups(prev => ({ ...prev, [newCardId]: [widgetKey] }));
         toast({ title: "Widget added as a new card." });
-    }, 0);
-  }, [widgetGroups, toast]);
+    }, [toast]);
 
     const WIDGET_COMPONENTS: Record<WidgetKey, Widget> = useMemo(() => ({
       chart: { id: 'chart', label: 'Chart', component: <InteractiveChartCardV2 stock={stockForSyncedComps} onManualTickerSubmit={handleSyncedTickerChange} /> },
@@ -188,7 +191,7 @@ function TradingDashboardPageContentV2() {
       positions: { id: 'positions', label: 'Positions', component: <OpenPositionsCardV2 className="h-full border-0 shadow-none rounded-none bg-transparent" onDelete={() => handleDeleteWidget('positions')} onAddWidget={addWidgetAsNewCard} /> },
       orders: { id: 'orders', label: 'Open Orders', component: <OrdersTableV2 className="h-full border-0 shadow-none rounded-none bg-transparent" onDelete={() => handleDeleteWidget('orders')} onAddWidget={addWidgetAsNewCard} /> },
       history: { id: 'history', label: 'History', component: <TradeHistoryTableV2 className="h-full border-0 shadow-none rounded-none bg-transparent" syncedTickerSymbol={syncedTickerSymbol} onDelete={() => handleDeleteWidget('history')} onAddWidget={addWidgetAsNewCard} /> },
-      watchlist: { id: 'watchlist', label: 'Watchlist', component: <WatchlistCardV2 className="h-full border-0 shadow-none rounded-none bg-transparent" onSymbolSelect={handleSyncedTickerChange} selectedSymbol={syncedTickerSymbol} /> },
+      watchlist: { id: 'watchlist', label: 'Watchlist', component: <WatchlistCardV2 className="h-full border-0 shadow-none rounded-none bg-transparent" onSymbolSelect={handleSyncedTickerChange} selectedSymbol={syncedTickerSymbol} onDelete={() => handleDeleteWidget('watchlist')} onAddWidget={addWidgetAsNewCard} /> },
       screeners: { id: 'screeners', label: 'Screeners', component: <ScreenerWatchlistV2 className="h-full border-0 shadow-none rounded-none bg-transparent" onSymbolSelect={handleSyncedTickerChange} selectedSymbol={syncedTickerSymbol} /> },
       news: { id: 'news', label: 'News', component: <NewsCardV2 className="h-full border-0 shadow-none rounded-none bg-transparent" onSymbolSelect={handleSyncedTickerChange} selectedSymbol={syncedTickerSymbol} onDelete={() => handleDeleteWidget('news')} onAddWidget={addWidgetAsNewCard} /> },
   }), [stockForSyncedComps, handleSyncedTickerChange, orderCardActionType, orderCardInitialTradeMode, orderCardMiloActionContext, handleTradeSubmit, handleClearOrderCard, orderCardInitialQuantity, orderCardInitialOrderType, orderCardInitialLimitPrice, syncedTickerSymbol, selectedAccount, handleDeleteWidget, addWidgetAsNewCard]);
@@ -288,15 +291,18 @@ function TradingDashboardPageContentV2() {
     }
   }, [syncedTickerSymbol, toast]);
   
-  const addWidgetToGroup = useCallback((groupId: string, widgetKey: WidgetKey) => {
-    const currentExistingWidgets = Object.values(widgetGroups).flat();
-    if (currentExistingWidgets.includes(widgetKey)) {
-        toast({ title: `Widget "${ALL_WIDGETS.find(w => w.id === widgetKey)?.label}" is already on the dashboard.` });
-        return;
-    }
-    
-    // Use timeout to ensure this runs after the current render cycle
-    setTimeout(() => {
+    const addWidgetToGroup = useCallback((groupId: string, widgetKey: WidgetKey) => {
+        let currentExistingWidgets: WidgetKey[] = [];
+        setWidgetGroups(currentGroups => {
+            currentExistingWidgets = Object.values(currentGroups).flat();
+            return currentGroups;
+        });
+
+        if (currentExistingWidgets.includes(widgetKey)) {
+            toast({ title: `Widget "${ALL_WIDGETS.find(w => w.id === widgetKey)?.label}" is already on the dashboard.` });
+            return;
+        }
+
         setWidgetGroups(prev => {
             const currentGroup = prev[groupId] || [];
             if (currentGroup.includes(widgetKey)) {
@@ -307,11 +313,9 @@ function TradingDashboardPageContentV2() {
             setActiveTabs(tabs => ({ ...tabs, [groupId]: widgetKey }));
             return newGroups;
         });
-    }, 0);
-  }, [widgetGroups, toast]);
+    }, [toast]);
 
   const handleRemoveWidgetFromGroup = useCallback((groupId: string, widgetKey: WidgetKey) => {
-    setTimeout(() => {
       setWidgetGroups(prev => {
           const newGroups = { ...prev };
           const group = newGroups[groupId] || [];
@@ -329,28 +333,27 @@ function TradingDashboardPageContentV2() {
           }
           return newGroups;
       });
-    }, 0);
   }, [activeTabs, toast]);
 
-  useEffect(() => {
-    const newActiveTabs: Record<string, WidgetKey> = {};
-    let hasChanged = false;
-    for (const groupId in widgetGroups) {
-        const group = widgetGroups[groupId];
-        if (group && group.length > 0) {
-            const currentActive = activeTabs[groupId];
-            if (!currentActive || !group.includes(currentActive)) {
-                newActiveTabs[groupId] = group[0];
-                hasChanged = true;
-            } else {
-                newActiveTabs[groupId] = currentActive;
+    useEffect(() => {
+        const newActiveTabs: Record<string, WidgetKey> = {};
+        let hasChanged = false;
+        for (const groupId in widgetGroups) {
+            const group = widgetGroups[groupId];
+            if (group && group.length > 0) {
+                const currentActive = activeTabs[groupId];
+                if (!currentActive || !group.includes(currentActive)) {
+                    newActiveTabs[groupId] = group[0];
+                    hasChanged = true;
+                } else {
+                    newActiveTabs[groupId] = currentActive;
+                }
             }
         }
-    }
-    if (Object.keys(newActiveTabs).length !== Object.keys(activeTabs).length || hasChanged) {
-        setActiveTabs(newActiveTabs);
-    }
-  }, [widgetGroups, activeTabs]);
+        if (hasChanged || Object.keys(newActiveTabs).length !== Object.keys(activeTabs).length) {
+            setActiveTabs(newActiveTabs);
+        }
+    }, [widgetGroups, activeTabs]);
   
   return (
     <main className="w-full h-full flex flex-col bg-background relative bg-dot-grid">
@@ -394,6 +397,7 @@ function TradingDashboardPageContentV2() {
                                         React.cloneElement(WIDGET_COMPONENTS[widgetsInGroup[0]].component as React.ReactElement<any>, {
                                             onDelete: () => handleDeleteWidget(groupId),
                                             onAddWidget: addWidgetAsNewCard,
+                                            isGrouped: false,
                                         })
                                     ) : (
                                        <Tabs value={activeTab} onValueChange={(tab) => setActiveTabs(tabs => ({...tabs, [groupId]: tab as WidgetKey}))} className="flex flex-col h-full">
@@ -444,7 +448,7 @@ function TradingDashboardPageContentV2() {
                                             </CardHeader>
                                             {widgetsInGroup.map(widgetKey => (
                                                 <TabsContent key={widgetKey} value={widgetKey} className="flex-1 overflow-y-auto h-full p-0 mt-0">
-                                                    {WIDGET_COMPONENTS[widgetKey] ? WIDGET_COMPONENTS[widgetKey].component : null}
+                                                    {WIDGET_COMPONENTS[widgetKey] ? React.cloneElement(WIDGET_COMPONENTS[widgetKey].component as React.ReactElement<any>, { isGrouped: true }) : null}
                                                 </TabsContent>
                                             ))}
                                        </Tabs>

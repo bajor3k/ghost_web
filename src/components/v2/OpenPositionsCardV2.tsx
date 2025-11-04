@@ -31,6 +31,7 @@ interface OpenPositionsCardProps {
     className?: string;
     onDelete?: () => void;
     onAddWidget?: (widgetKey: WidgetKey) => void;
+    isGrouped?: boolean;
 }
 
 const PositionRow = ({ position, onClose }: { position: OpenPosition; onClose: (id: string) => void; }) => {
@@ -77,7 +78,7 @@ const PositionRow = ({ position, onClose }: { position: OpenPosition; onClose: (
     );
 };
 
-export function OpenPositionsCardV2({ className, onDelete, onAddWidget }: OpenPositionsCardProps) {
+export function OpenPositionsCardV2({ className, onDelete, onAddWidget, isGrouped }: OpenPositionsCardProps) {
     const { openPositions, closePosition } = useOpenPositionsContext();
     const { toast } = useToast();
 
@@ -85,7 +86,7 @@ export function OpenPositionsCardV2({ className, onDelete, onAddWidget }: OpenPo
       e.stopPropagation();
     }
     
-    const showHeader = onDelete && onAddWidget;
+    const showHeader = onDelete && onAddWidget && !isGrouped;
 
     return (
         <div className={cn("h-full flex flex-col", className)}>
