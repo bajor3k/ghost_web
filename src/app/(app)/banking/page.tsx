@@ -225,8 +225,6 @@ export default function BankingPage() {
           "shadow-[0_0_0_1px_rgba(180,112,255,0.06)_inset] relative"
         )}
       >
-        {/* subtle glow bar */}
-        <div className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent"></div>
 
         <header className="px-5 py-4 border-b border-white/10">
           <h2 className="text-sm font-medium tracking-wide text-white/80">Accounts</h2>
