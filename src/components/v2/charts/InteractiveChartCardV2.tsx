@@ -81,7 +81,7 @@ const PlaceholderChart = () => (
 
 
 // Map UI timeframes to Alpaca API parameters
-const getTimeframeParams = (timeframe: '1D' | '5D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | '5Y' | 'All') => {
+const getTimeframeParams = (timeframe: '1D' | '5D' | '1M' | '3M' | 'YTD' | '1Y' | '5Y' | 'All') => {
   const now = new Date();
   switch (timeframe) {
     case '1D':
@@ -92,8 +92,6 @@ const getTimeframeParams = (timeframe: '1D' | '5D' | '1M' | '3M' | '6M' | 'YTD' 
       return { timeframe: '1Day', start: formatISO(sub(now, { months: 1 })) };
     case '3M':
       return { timeframe: '1Day', start: formatISO(sub(now, { months: 3 })) };
-    case '6M':
-      return { timeframe: '1Day', start: formatISO(sub(now, { months: 6 })) };
     case 'YTD':
       return { timeframe: '1Day', start: formatISO(new Date(now.getFullYear(), 0, 1)) };
     case '1Y':
@@ -111,7 +109,7 @@ const getTimeframeParams = (timeframe: '1D' | '5D' | '1M' | '3M' | '6M' | 'YTD' 
 export function InteractiveChartCardV2({ stock, onManualTickerSubmit, className, variant = 'trading' }: InteractiveChartCardProps) {
   const { toast } = useToast();
   const [chartType, setChartType] = useState<'line' | 'area' | 'candle'>('area');
-  const [timeframe, setTimeframe] = useState<'1D' | '5D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | '5Y' | 'All'>('1M');
+  const [timeframe, setTimeframe] = useState<'1D' | '5D' | '1M' | '3M' | 'YTD' | '1Y' | '5Y' | 'All'>('1M');
   const [manualTickerInput, setManualTickerInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -417,7 +415,7 @@ export function InteractiveChartCardV2({ stock, onManualTickerSubmit, className,
       </CardContent>
      
       <CardFooter className="flex flex-wrap justify-start items-center gap-x-1 gap-y-2 pt-2 pb-2 px-3 no-drag">
-        {['1D', '5D', '1M', '3M', '6M', 'YTD', '1Y', '5Y', 'All'].map((tf) => (
+        {['1D', '5D', '1M', '3M', 'YTD', '1Y', '5Y', 'All'].map((tf) => (
           <Button
             key={tf}
             variant="ghost"
@@ -469,10 +467,3 @@ export function InteractiveChartCardV2({ stock, onManualTickerSubmit, className,
     </Card>
   );
 }
-
-
-
-
-
-
-

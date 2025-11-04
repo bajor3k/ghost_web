@@ -311,8 +311,8 @@ export function InteractiveChartCard({ stock, onManualTickerSubmit, className, v
   };
 
   const timeframeButtons: Timeframe[] = variant === 'trading'
-    ? ['1D', '5D', '1M', '3M', '6M', 'YTD', '1Y', '5Y', 'Max']
-    : ['1D', '5D', '1M', '3M', '6M', 'YTD', '1Y', '5Y', 'All'];
+    ? ['1D', '5D', '1M', '3M', 'YTD', '1Y', '5Y', 'Max']
+    : ['1D', '5D', '1M', '3M', 'YTD', '1Y', '5Y', 'All'];
 
   const displayPrice = hoveredData ? hoveredData.price : stock?.price;
   const displayChange = hoveredData ? hoveredData.change : stock ? stock.price * (stock.changePercent / 100) : 0;

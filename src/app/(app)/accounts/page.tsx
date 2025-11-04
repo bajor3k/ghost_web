@@ -408,8 +408,8 @@ export default function AccountsPage() {
                         onManualTickerSubmit={handleTickerSubmit}
                         variant="account"
                         className="h-full"
-                        timeframe={timeRange}
-                        onTimeframeChange={handleTimeRangeChange}
+                        timeframe={timeRange as any}
+                        onTimeframeChange={handleTimeRangeChange as any}
                         showWatchlistButton={false}
                         showAlertButton={false}
                     />
@@ -549,4 +549,3 @@ export default function AccountsPage() {
     
 
     
-
